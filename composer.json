@@ -1,0 +1,8 @@
+{
+     "name": "8xprovn/keycloak",
+     "autoload": {
+         "psr-4": {
+             "Keycloak\\": "src/"
+         }
+     }
+ }
