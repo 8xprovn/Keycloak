@@ -253,7 +253,6 @@ class KeycloakService
         }
         return false;
     }
-
     /**
      * Get access token from Code
      * @param  array $credentials
@@ -261,8 +260,8 @@ class KeycloakService
      */
     public function getUserProfile($credentials)
     {
-        if (!empty($this->userProfile)){
-            return $this->userProfile;
+        if ($userProfile = session()->get(self::KEYCLOAK_SESSION.'user_profile')){
+            return $userProfile;
         }
         $credentials = $this->refreshTokenIfNeeded($credentials);
         if (empty($credentials['access_token'])) {
@@ -272,7 +271,9 @@ class KeycloakService
         $user =  $this->parseAccessToken($credentials['access_token']);
         $userProfile = $this->retrieveProfile($credentials);
         if ($userProfile && !empty($user['sub'])) {
-            return array_merge(['user_id' => $user['sub']],$userProfile);
+            $userProfile =  array_merge(['user_id' => $user['sub']],$userProfile);
+            session()->put(self::KEYCLOAK_SESSION.'user_profile', $userProfile);
+            return $userProfile;
         }
         return [];
     }
@@ -342,7 +343,9 @@ class KeycloakService
     public function forgetToken()
     {
         session()->forget(self::KEYCLOAK_SESSION.'access_token');
+        session()->forget(self::KEYCLOAK_SESSION.'user_profile');
         Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'refresh_token'));
+
         //Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'access_token'));
     }
 
