@@ -247,11 +247,9 @@ class KeycloakService
         //     return $permission;
         // }
         $token = $this->retrieveToken();
-        $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission?t=1',['service' => config('app.service_code')]);
-        if ($response->getStatusCode() === 200) {
-            $content = $response->getBody()->getContents();
-            $content = json_decode($content, true);
-            return $content;
+        $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
+        if ($response->successful()) {
+            return $response->json();
         }
         return false;
     }
@@ -272,12 +270,19 @@ class KeycloakService
             return [];
         }
         $user =  $this->parseAccessToken($credentials['access_token']);
-        if (!empty($user['sub'])) {
-            return ['user_id' => $user['sub']];    
+        $userProfile = $this->retrieveProfile($credentials);
+        if ($userProfile && !empty($user['sub'])) {
+            return array_merge(['user_id' => $user['sub']],$userProfile);
         }
         return [];
     }
-
+    public function retrieveProfile($token) {
+        $response = \Http::withToken($token['access_token'])->get(env('API_MICROSERVICE_URL').'/hr/employees/me');
+        if ($response->successful()) {
+            return $response->json();
+        }
+        return false;
+    }
     /**
      * Get Access Token data
      *
