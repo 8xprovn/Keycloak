@@ -117,7 +117,7 @@ class KeycloakWebGuard implements Guard
         if (!$credentials) {
             $credentials = KeycloakWeb::retrieveToken();    
         }
-        if (empty($credentials)) {
+        if (empty($credentials['access_token'])) {
             return false;
         }
         $user = KeycloakWeb::getUserProfile($credentials);
