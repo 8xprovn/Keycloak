@@ -84,7 +84,7 @@ class KeycloakServiceProvider extends ServiceProvider
         $router = $this->app->make('router');
 
         $middlewares = [
-            \App\Http\Middleware\EncryptCookies::class,
+            //\App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
         ];
