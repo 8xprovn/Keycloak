@@ -337,7 +337,7 @@ class KeycloakService
         //Cookie::queue(self::KEYCLOAK_SESSION.'refresh_token', $credentials['refresh_token'], 43200);
 
         setcookie(self::KEYCLOAK_SESSION.'access_token', $credentials['access_token'], time() + 3600 , '/', null , false , false);
-        setcookie(self::KEYCLOAK_SESSION.'refresh_token', $credentials['access_token'], time() + 259200 , '/', null , false , false); // 3 ngay
+        setcookie(self::KEYCLOAK_SESSION.'refresh_token', $credentials['refresh_token'], time() + 259200 , '/', null , false , false); // 3 ngay
         
         //Cookie::queue(cookie(self::KEYCLOAK_SESSION.'access_token', $credentials['access_token'], 180, '/' , null , false, false));
         //setcookie("TestCookie", $credentials['access_token'], 180, '/' , null , false, false);
