@@ -3,6 +3,7 @@
 namespace Keycloak\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate;
+use Keycloak\Facades\KeycloakWeb;
 
 class KeycloakAuthenticated extends Authenticate
 {
@@ -14,6 +15,7 @@ class KeycloakAuthenticated extends Authenticate
      */
     protected function redirectTo($request)
     {
-        return route('keycloak.login');
+        $url = KeycloakWeb::getLoginUrl();
+        return redirect($url);
     }
 }
