@@ -83,26 +83,20 @@ class KeycloakServiceProvider extends ServiceProvider
         // Register Routes
         $router = $this->app->make('router');
 
-        $middlewares = [
-            //\App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-        ];
-
         if (! empty($options['login'])) {
-            $router->middleware($middlewares)->get($options['login'], 'Keycloak\Controllers\AuthController@login')->name('keycloak.login');
+            $router->get($options['login'], 'Keycloak\Controllers\AuthController@login')->name('keycloak.login');
         }
 
         if (! empty($options['logout'])) {
-            $router->middleware($middlewares)->get($options['logout'], 'Keycloak\Controllers\AuthController@logout')->name('keycloak.logout');
+            $router->get($options['logout'], 'Keycloak\Controllers\AuthController@logout')->name('keycloak.logout');
         }
 
         if (! empty($options['register'])) {
-            $router->middleware($middlewares)->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
+            $router->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
         }
 
         if (! empty($options['callback'])) {
-            $router->middleware($middlewares)->get($options['callback'], 'Keycloak\Controllers\AuthController@callback')->name('keycloak.callback');
+            $router->get($options['callback'], 'Keycloak\Controllers\AuthController@callback')->name('keycloak.callback');
         }
     }
 }
