@@ -16,6 +16,7 @@ class KeycloakAuthenticated extends Authenticate
     protected function redirectTo($request)
     {
         $url = KeycloakWeb::getLoginUrl();
-        return redirect($url);
+        return $url;
+        //return redirect($url);
     }
 }
