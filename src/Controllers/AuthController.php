@@ -65,7 +65,7 @@ class AuthController extends Controller
         if (! empty($code)) {
             $token = KeycloakWeb::getAccessToken($code);
             if (Auth::validate($token)) {
-                $url = route('home');
+                $url = env('ROUTE_PREFIX');
                 return redirect($url);
             }
         }
