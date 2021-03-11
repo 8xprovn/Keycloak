@@ -88,15 +88,25 @@ class KeycloakService
     public function __construct(ClientInterface $client)
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim(env('KEYCLOAK_BASE_URL'));
+            $this->baseUrl = trim(Config::get('keycloak-web.base_url'), '/');
         }
+
+        if (is_null($this->realm)) {
+            $this->realm = Config::get('keycloak-web.realm');
+        }
+
         if (is_null($this->clientId)) {
-            $this->clientId = env('KEYCLOAK_CLIENT_ID');
+            $this->clientId = Config::get('keycloak-web.client_id');
         }
 
         if (is_null($this->clientSecret)) {
-            $this->clientSecret = env('KEYCLOAK_CLIENT_SECRET');
+            $this->clientSecret = Config::get('keycloak-web.client_secret');
         }
+
+        if (is_null($this->cacheOpenid)) {
+            $this->cacheOpenid = Config::get('keycloak-web.cache_openid', false);
+        }
+
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = route('keycloak.callback');
         }
@@ -104,6 +114,7 @@ class KeycloakService
         if (is_null($this->redirectLogout)) {
             $this->redirectLogout = Config::get('keycloak-web.redirect_logout');
         }
+
         $this->httpClient = $client;
     }
 
@@ -232,42 +243,11 @@ class KeycloakService
         return $token;
     }
     public function getPermissionUser() {
-        if (class_exists('\App\Models\Authorization\Permissions')) {
-            $userDetail = \Auth::user();
-            //////// CHECK SUPPER ADMIN ///////
-            $arrPermissionId = [];
-            $permissionModel = new \App\Models\Authorization\Permissions;
-            $roles = $permissionModel->getRolesByEmployee(['employee_id' => $userDetail->employee_id]);
-            $is_superadmin = $roles->firstWhere('is_superadmin',1);
-            if($is_superadmin){
-                return ['role'=> 'superadmin'];
-            }
-            $arrRoleId = $roles->pluck('role_id')->all();
-            ////////// LAY PERMISSION THEO ROLE ////////
-            if ($arrRoleId) {
-                $arrPermissionId = $permissionModel->getPermissionsByObject(['other_id' => $arrRoleId,'type' => 'role'])->pluck('permission_id')->all();
-            }    
-            $arrPermissionId = $permissionModel->getPermissionsByObject(['other_id' => $userDetail->employee_id,'type' => 'employee_id'])->pluck('permission_id')->all();
-            if (!empty($userDetail->department_id)) {
-                $arrPermissionId = array_merge($arrPermissionId,$permissionModel->getPermissionsByObject(['other_id' => $userDetail->department_id,'type' => 'department'])->pluck('permission_id')->all());
-            }
-            if (!$arrPermissionId) {
-                return [];
-            }
-            $allowed_permissions = $permissionModel->getPermissionDetails(['permission_id' => $arrPermissionId])->pluck('rule');
-            return $allowed_permissions;
+        $token = $this->retrieveToken();
+        $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
+        if ($response->successful()) {
+            return $response->json();
         }
-        else {
-            // if ($perrmision = session()->get(self::KEYCLOAK_SESSION.'permission')) {
-            //     return $permission;
-            // }
-            $token = $this->retrieveToken();
-            $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
-            if ($response->successful()) {
-                return $response->json();
-            }
-        }
-        
         return false;
     }
     /**
@@ -312,7 +292,7 @@ class KeycloakService
         if (! is_string($token)) {
             return [];
         }
-        $public_key = env('KEYCLOAK_REALM_PUBLIC_KEY');
+        $public_key = Config::get('keycloak-web.realm_public_key');
         try {
             JWT::$leeway = 10;
             return (array)JWT::decode($token, $public_key , array('RS256'));
