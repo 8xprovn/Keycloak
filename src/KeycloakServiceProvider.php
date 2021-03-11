@@ -70,16 +70,12 @@ class KeycloakServiceProvider extends ServiceProvider
      */
     private function registerRoutes()
     {
-        $defaults = [
-            'login' => 'login',
-            'logout' => 'logout',
-            'register' => 'register',
-            'callback' => 'callback',
+        $options = [
+            'login' => 'authorize/login',
+            'logout' => 'authorize/logout',
+            //'register' => 'auth/register',
+            'callback' => 'authorize/callback',
         ];
-
-        $options = Config::get('keycloak-web.routes', []);
-        $options = array_merge($defaults, $options);
-
         // Register Routes
         $router = $this->app->make('router');
 
@@ -91,9 +87,9 @@ class KeycloakServiceProvider extends ServiceProvider
             $router->get($options['logout'], 'Keycloak\Controllers\AuthController@logout')->name('keycloak.logout');
         }
 
-        if (! empty($options['register'])) {
-            $router->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
-        }
+        // if (! empty($options['register'])) {
+        //     $router->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
+        // }
 
         if (! empty($options['callback'])) {
             $router->get($options['callback'], 'Keycloak\Controllers\AuthController@callback')->name('keycloak.callback');
