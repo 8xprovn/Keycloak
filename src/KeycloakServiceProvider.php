@@ -71,10 +71,10 @@ class KeycloakServiceProvider extends ServiceProvider
     private function registerRoutes()
     {
         $options = [
-            'login' => 'authorize/login',
-            'logout' => 'authorize/logout',
+            'login' => '/authorize/login',
+            'logout' => '/authorize/logout',
             //'register' => 'auth/register',
-            'callback' => 'authorize/callback',
+            'callback' => '/authorize/callback',
         ];
         // Register Routes
         $router = $this->app->make('router');
