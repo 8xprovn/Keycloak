@@ -88,29 +88,18 @@ class KeycloakService
     public function __construct(ClientInterface $client)
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim(Config::get('keycloak-web.base_url'), '/');
+            $this->baseUrl = trim(env('KEYCLOAK_BASE_URL'));
         }
-
-        if (is_null($this->realm)) {
-            $this->realm = Config::get('keycloak-web.realm');
-        }
-
         if (is_null($this->clientId)) {
-            $this->clientId = Config::get('keycloak-web.client_id');
+            $this->clientId = env('KEYCLOAK_CLIENT_ID');
         }
 
         if (is_null($this->clientSecret)) {
-            $this->clientSecret = Config::get('keycloak-web.client_secret');
+            $this->clientSecret = env('KEYCLOAK_CLIENT_SECRET');
         }
-
-        if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = Config::get('keycloak-web.cache_openid', false);
-        }
-
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = route('keycloak.callback');
         }
-
         if (is_null($this->redirectLogout)) {
             $this->redirectLogout = Config::get('keycloak-web.redirect_logout');
         }
@@ -292,7 +281,7 @@ class KeycloakService
         if (! is_string($token)) {
             return [];
         }
-        $public_key = Config::get('keycloak-web.realm_public_key');
+        $public_key = env('KEYCLOAK_REALM_PUBLIC_KEY');
         try {
             JWT::$leeway = 10;
             return (array)JWT::decode($token, $public_key , array('RS256'));
