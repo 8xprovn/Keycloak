@@ -232,10 +232,16 @@ class KeycloakService
         return $token;
     }
     public function getPermissionUser() {
+        $userId = \Auth::id();
+        if ($permission = session()->get(self::KEYCLOAK_SESSION.'user_permission_'.$userId)){
+            return $permission;
+        }
         $token = $this->retrieveToken();
         $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
         if ($response->successful()) {
-            return $response->json();
+            $permission = $response->json();
+            session()->put(self::KEYCLOAK_SESSION.'user_permission_'.$userId, $permission);
+            return $permission;
         }
         return false;
     }
@@ -246,22 +252,24 @@ class KeycloakService
      */
     public function getUserProfile($credentials)
     {
-        if ($userProfile = session()->get(self::KEYCLOAK_SESSION.'user_profile')){
-            return $userProfile;
-        }
         $credentials = $this->refreshTokenIfNeeded($credentials);
         if (empty($credentials['access_token'])) {
             $this->forgetToken();
             return [];
         }
         $user =  $this->parseAccessToken($credentials['access_token']);
-        $userProfile = $this->retrieveProfile($credentials);
-        if ($userProfile && !empty($user['sub'])) {
-            $userProfile =  array_merge(['user_id' => $user['sub']],$userProfile);
-            session()->put(self::KEYCLOAK_SESSION.'user_profile', $userProfile);
+        if (!$user) {
+            return [];
+        }
+        if ($userProfile = session()->get(self::KEYCLOAK_SESSION.'user_profile_'.$user['sub'])){
             return $userProfile;
         }
-        return [];
+        $userProfile = $this->retrieveProfile($credentials);
+        if ($userProfile) {
+            $userProfile['user_id'] = $user['sub'];
+            session()->put(self::KEYCLOAK_SESSION.'user_profile_'.$user['sub'], $userProfile);
+        }
+        return $userProfile;
     }
     public function retrieveProfile($token) {
         $response = \Http::withToken($token['access_token'])->get(env('API_MICROSERVICE_URL').'/hr/employees/me');
