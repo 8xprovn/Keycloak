@@ -243,14 +243,42 @@ class KeycloakService
         return $token;
     }
     public function getPermissionUser() {
-        // if ($perrmision = session()->get(self::KEYCLOAK_SESSION.'permission')) {
-        //     return $permission;
-        // }
-        $token = $this->retrieveToken();
-        $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
-        if ($response->successful()) {
-            return $response->json();
+        if (class_exists('\App\Models\Authorization\Permissions')) {
+            $userDetail = \Auth::user();
+            //////// CHECK SUPPER ADMIN ///////
+            $arrPermissionId = [];
+            $permissionModel = new \App\Models\Authorization\Permissions;
+            $roles = $permissionModel->getRolesByEmployee(['employee_id' => $userDetail->employee_id]);
+            $is_superadmin = $roles->firstWhere('is_superadmin',1);
+            if($is_superadmin){
+                return ['role'=> 'superadmin'];
+            }
+            $arrRoleId = $roles->pluck('role_id')->all();
+            ////////// LAY PERMISSION THEO ROLE ////////
+            if ($arrRoleId) {
+                $arrPermissionId = $permissionModel->getPermissionsByObject(['other_id' => $arrRoleId,'type' => 'role'])->pluck('permission_id')->all();
+            }    
+            $arrPermissionId = $permissionModel->getPermissionsByObject(['other_id' => $userDetail->employee_id,'type' => 'employee_id'])->pluck('permission_id')->all();
+            if (!empty($userDetail->department_id)) {
+                $arrPermissionId = array_merge($arrPermissionId,$permissionModel->getPermissionsByObject(['other_id' => $userDetail->department_id,'type' => 'department'])->pluck('permission_id')->all());
+            }
+            if (!$arrPermissionId) {
+                return [];
+            }
+            $allowed_permissions = $permissionModel->getPermissionDetails(['permission_id' => $arrPermissionId])->pluck('rule');
+            return $allowed_permissions;
         }
+        else {
+            // if ($perrmision = session()->get(self::KEYCLOAK_SESSION.'permission')) {
+            //     return $permission;
+            // }
+            $token = $this->retrieveToken();
+            $response = \Http::withToken($token['access_token'])->get($this->baseUrl.'/api/permission',['service' => config('app.service_code')]);
+            if ($response->successful()) {
+                return $response->json();
+            }
+        }
+        
         return false;
     }
     /**

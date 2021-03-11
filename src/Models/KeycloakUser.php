@@ -20,7 +20,8 @@ class KeycloakUser implements Authenticatable
         'email',
         'employee_id',
         'branch_id',
-        'branch_city_code'
+        'branch_city_code',
+        'department_id'
     ];
 
     /**
