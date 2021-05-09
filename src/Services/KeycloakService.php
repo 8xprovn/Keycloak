@@ -139,8 +139,8 @@ class KeycloakService
         if (empty($this->redirectLogout)) {
             $this->redirectLogout = url('/');
         }
-
-        return $this->buildUrl($url, ['redirect_uri' => $this->redirectLogout]);
+        return $this->buildUrl($url, []);
+        //return $this->buildUrl($url, ['redirect_uri' => $this->redirectLogout]);
     }
 
     /**
@@ -350,8 +350,8 @@ class KeycloakService
         //session()->forget(self::KEYCLOAK_SESSION.'access_token');
         session()->forget(self::KEYCLOAK_SESSION.'user_profile');
 
-        setcookie(self::KEYCLOAK_SESSION.'access_token', "", time() - 3600);
-        setcookie(self::KEYCLOAK_SESSION.'refresh_token', "", time() - 3600);
+        setcookie(self::KEYCLOAK_SESSION.'access_token', "", time() - 86400);
+        setcookie(self::KEYCLOAK_SESSION.'refresh_token', "", time() - 86400);
         // Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'refresh_token'));
         // Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'access_token'));
     }
