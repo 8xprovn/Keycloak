@@ -349,8 +349,8 @@ class KeycloakService
     {
         //session()->forget(self::KEYCLOAK_SESSION.'access_token');
         \Session::invalidate();
-        setcookie(self::KEYCLOAK_SESSION.'access_token', "", time() - 86400);
-        setcookie(self::KEYCLOAK_SESSION.'refresh_token', "", time() - 86400);
+        setcookie(self::KEYCLOAK_SESSION.'access_token', "", time() - 86400,'/');
+        setcookie(self::KEYCLOAK_SESSION.'refresh_token', "", time() - 86400,'/');
         // Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'refresh_token'));
         // Cookie::queue(Cookie::forget(self::KEYCLOAK_SESSION.'access_token'));
     }
