@@ -21,7 +21,13 @@ class KeycloakCan extends KeycloakAuthenticated
     {
         $allowed_permissions = KeycloakWeb::getPermissionUser();
         if (!$allowed_permissions) {
-            abort(403);
+            
+            if($request->ajax()){
+                return response(['error' => '403', 'error_description' => 'Không đủ quyền truy cập vào tài nguyên này'], 403);
+            }
+            else {
+                abort(403);
+            }
         }
         $is_superadmin = (!empty($allowed_permissions['role']) && $allowed_permissions['role'] == 'superadmin') ? true : false;
         $current_nameas = \Request::route()->getName(); //router name
@@ -45,7 +51,11 @@ class KeycloakCan extends KeycloakAuthenticated
         if(\Gate::allows($current_nameas)){
             return $next($request);
         }
-
-        abort(403);
+        if($request->ajax()){
+            return response(['error' => '403', 'error_description' => 'Không đủ quyền truy cập vào tài nguyên này'], 403);
+        }
+        else {
+            abort(403);
+        }
     }
 }
