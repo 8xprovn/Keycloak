@@ -19,7 +19,7 @@ class KeycloakCan extends KeycloakAuthenticated
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        $allowed_permissions = KeycloakWeb::getPermissionUser();
+        $allowed_permissions = KeycloakWeb::getPermissionUser(); /// khong duoc cap quyen j
         if (!$allowed_permissions) {
             
             if($request->ajax()){
@@ -28,6 +28,11 @@ class KeycloakCan extends KeycloakAuthenticated
             else {
                 abort(403);
             }
+        }
+        if($request->ajax()){
+            if ($request->isMethod('get')) {
+                return $next($request);
+            }   
         }
         $is_superadmin = (!empty($allowed_permissions['role']) && $allowed_permissions['role'] == 'superadmin') ? true : false;
         $current_nameas = \Request::route()->getName(); //router name
