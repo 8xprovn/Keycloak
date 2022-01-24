@@ -29,11 +29,11 @@ class KeycloakCan extends KeycloakAuthenticated
                 abort(403);
             }
         }
-        if($request->ajax()){
-            if ($request->isMethod('get')) {
-                return $next($request);
-            }   
-        }
+        // if($request->ajax()){
+        //     if ($request->isMethod('get')) {
+        //         return $next($request);
+        //     }   
+        // }
         $is_superadmin = (!empty($allowed_permissions['role']) && $allowed_permissions['role'] == 'superadmin') ? true : false;
         $current_nameas = \Request::route()->getName(); //router name
         \Gate::before(function () use ($is_superadmin) {
