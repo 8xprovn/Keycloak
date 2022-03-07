@@ -11,7 +11,7 @@ use Keycloak\Models\KeycloakUser;
 use Keycloak\Facades\KeycloakWeb;
 use Illuminate\Contracts\Auth\UserProvider;
 
-class KeycloakWebGuard implements Guard
+class KeycloakWebGuard
 {
     /**
      * @var null|Authenticatable|KeycloakUser
