@@ -66,6 +66,7 @@ class AuthController extends Controller
             $token = KeycloakWeb::getAccessToken($code);
             if (Auth::validate($token)) {
                 $url = env('ROUTE_PREFIX') ?? '/';
+                //return response("OK");
                 return redirect($url);
             }
         }

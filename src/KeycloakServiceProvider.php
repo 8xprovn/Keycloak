@@ -14,6 +14,7 @@ use Keycloak\Middleware\KeycloakAuthenticated;
 use Keycloak\Middleware\KeycloakCan;
 use Keycloak\Models\KeycloakUser;
 use Keycloak\Services\KeycloakService;
+use Illuminate\Support\Facades\Route;
 
 class KeycloakServiceProvider extends ServiceProvider
 {
@@ -54,7 +55,7 @@ class KeycloakServiceProvider extends ServiceProvider
         // Middleware Group
         $this->app['router']->middlewareGroup('keycloak-web', [
             StartSession::class,
-            KeycloakAuthenticated::class,
+            KeycloakAuthenticated::class
         ]);
 
         $this->app['router']->aliasMiddleware('keycloak-web-can', KeycloakCan::class);
@@ -79,20 +80,24 @@ class KeycloakServiceProvider extends ServiceProvider
         // Register Routes
         $router = $this->app->make('router');
 
-        if (! empty($options['login'])) {
-            $router->get($options['login'], 'Keycloak\Controllers\AuthController@login')->name('keycloak.login');
-        }
-
-        if (! empty($options['logout'])) {
-            $router->get($options['logout'], 'Keycloak\Controllers\AuthController@logout')->name('keycloak.logout');
-        }
-
-        // if (! empty($options['register'])) {
-        //     $router->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
-        // }
-
-        if (! empty($options['callback'])) {
-            $router->get($options['callback'], 'Keycloak\Controllers\AuthController@callback')->name('keycloak.callback');
-        }
+        Route::group(['middleware' => 'web','prefix'=>env('ROUTE_PREFIX')], function () use ($router, $options) {
+    
+            if (! empty($options['login'])) {
+                $router->get($options['login'], 'Keycloak\Controllers\AuthController@login')->name('keycloak.login');
+            }
+    
+            if (! empty($options['logout'])) {
+                $router->get($options['logout'], 'Keycloak\Controllers\AuthController@logout')->name('keycloak.logout');
+            }
+    
+            // if (! empty($options['register'])) {
+            //     $router->get($options['register'], 'Keycloak\Controllers\AuthController@register')->name('keycloak.register');
+            // }
+    
+            if (! empty($options['callback'])) {
+                $router->get($options['callback'], 'Keycloak\Controllers\AuthController@callback')->name('keycloak.callback');
+            }
+        });
+        
     }
 }
